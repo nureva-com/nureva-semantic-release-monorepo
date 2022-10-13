@@ -14,7 +14,7 @@ const analyzeCommits = wrapStep(
   'analyzeCommits',
   compose(logPluginVersion('analyzeCommits'), withOnlyPackageCommits),
   {
-    wrapperName: 'semantic-release-monorepo',
+    wrapperName: 'nureva-semantic-release-monorepo',
   }
 );
 
@@ -26,7 +26,7 @@ const generateNotes = wrapStep(
     withOptionsTransforms([mapNextReleaseVersion(versionToGitTag)])
   ),
   {
-    wrapperName: 'semantic-release-monorepo',
+    wrapperName: 'nureva-semantic-release-monorepo',
   }
 );
 
@@ -38,7 +38,7 @@ const success = wrapStep(
     withOptionsTransforms([mapNextReleaseVersion(versionToGitTag)])
   ),
   {
-    wrapperName: 'semantic-release-monorepo',
+    wrapperName: 'nureva-semantic-release-monorepo',
   }
 );
 
@@ -50,7 +50,7 @@ const fail = wrapStep(
     withOptionsTransforms([mapNextReleaseVersion(versionToGitTag)])
   ),
   {
-    wrapperName: 'semantic-release-monorepo',
+    wrapperName: 'nureva-semantic-release-monorepo',
   }
 );
 

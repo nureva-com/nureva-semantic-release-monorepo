@@ -73,7 +73,7 @@ const withFiles = async commits => {
 
 const onlyPackageCommits = async commits => {
   const packagePaths = await getPackagePath();
-  debug('Filter commits by package path: "%s"', packagePaths);
+  debug('Filter commits by package paths: "%s"', packagePaths);
   const commitsWithFiles = await withFiles(commits);
   // Convert package root path into segments - one for each folder
   // const packageSegments = packagePath.split(path.sep);
