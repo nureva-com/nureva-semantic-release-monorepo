@@ -80,19 +80,24 @@ const onlyPackageCommits = async commits => {
   const commitsWithFiles = await withFiles(commits);
   // Convert package root path into segments - one for each folder
 
-  for (const commit of commitsWithFiles) {
-    debug('Commit: "%s"', commit);
+  // for (const commit of commitsWithFiles) {
+  //   debug('Commit: "%s"', commit);
+  // }
+
+  for (const packagePath of packagePaths) {
+    debug('packagePath: "%s"', packagePath);
   }
 
   return commitsWithFiles.filter(({ files, subject }) => {
-    for (const packagePath of packagePaths) {
+    let packageFile = false;
+    for (let packagePath of packagePaths) {
       let packageSegments = packagePath.split(path.sep);
       debug('packageSegments: "%s"', packageSegments);
 
       // Normalise paths and check if any changed files' path segments start
       // with that of the package root.
-      const packageFile = files.find(file => {
-        const fileSegments = path.normalize(file).split(path.sep);
+      packageFile = files.find(file => {
+        let fileSegments = path.normalize(file).split(path.sep);
         // Check the file is a *direct* descendent of the package folder (or the folder itself)
         return packageSegments.every(
           (packageSegment, i) => packageSegment === fileSegments[i]
@@ -106,9 +111,8 @@ const onlyPackageCommits = async commits => {
           packageFile
         );
       }
-
-      return !!packageFile;
     }
+    return !!packageFile;
   });
 };
 
