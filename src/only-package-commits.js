@@ -7,7 +7,6 @@ const debug = require('debug')('semantic-release:monorepo');
 const { getCommitFiles, getRoot } = require('./git-utils');
 const { mapCommits } = require('./options-transforms');
 const fs = require('fs').promises;
-
 const memoizedGetCommitFiles = memoizeWith(identity, getCommitFiles);
 
 /**
@@ -18,18 +17,6 @@ const getPackagePath = async () => {
   const gitRoot = await getRoot();
 
   return path.relative(gitRoot, path.resolve(packagePath, '..'));
-};
-
-const withFiles = async commits => {
-  const limit = pLimit(Number(process.env.SRM_MAX_THREADS) || 500);
-  return Promise.all(
-    commits.map(commit =>
-      limit(async () => {
-        const files = await memoizedGetCommitFiles(commit.hash);
-        return { ...commit, files };
-      })
-    )
-  );
 };
 
 const getPackagesPaths = async () => {
@@ -70,29 +57,40 @@ const getPackagesPaths = async () => {
   }
 };
 
+const withFiles = async commits => {
+  const limit = pLimit(Number(process.env.SRM_MAX_THREADS) || 500);
+  return Promise.all(
+    commits.map(commit =>
+      limit(async () => {
+        const files = await memoizedGetCommitFiles(commit.hash);
+        return { ...commit, files };
+      })
+    )
+  );
+};
+
 const onlyPackageCommits = async commits => {
-  const packagePath = await getPackagePath();
-  const packagePaths = await getPackagesPaths();
+  let packagePaths = await getPackagesPaths();
 
-  debug('packagePaths "%s"', packagePaths);
+  // packagePath = packagePath[1];
 
-  const packagePathSegments = [];
-  for (const path of packagePaths) {
-    debug('path "%s"', path);
-
-    packagePathSegments.push(path.split(path.sep));
-  }
-
-  console.log(packagePathSegments);
+  debug('Filter commits by package path: "%s"', packagePaths);
+  debug('!!!!!!!!!!QAEQWEQWWQEQWE');
 
   const commitsWithFiles = await withFiles(commits);
   // Convert package root path into segments - one for each folder
-  // const packageSegments = packagePath.split(path.sep);
+
+  for (const commit of commitsWithFiles) {
+    debug('Commit: "%s"', commit);
+  }
 
   return commitsWithFiles.filter(({ files, subject }) => {
-    // Normalise paths and check if any changed files' path segments start
-    // with that of the package root.
-    for (const packageSegments of packagePathSegments) {
+    for (const packagePath of packagePaths) {
+      let packageSegments = packagePath.split(path.sep);
+      debug('packageSegments: "%s"', packageSegments);
+
+      // Normalise paths and check if any changed files' path segments start
+      // with that of the package root.
       const packageFile = files.find(file => {
         const fileSegments = path.normalize(file).split(path.sep);
         // Check the file is a *direct* descendent of the package folder (or the folder itself)
